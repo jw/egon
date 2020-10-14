@@ -1,0 +1,19 @@
+
+vvvv
+O 23.73% [bytes/bytes] Syncing xx of yy files... (eta: time).
+[remote file...] -> [local file...] bytes/bytes 76.22% (eta: time) |
+[remote file...] -> [local file...] bytes/bytes 76.22% (eta: time) |
+[remote file...] -> [local file...] bytes/bytes 76.22% (eta: time) |
+
+vvv
+O 23.73% [bytes/bytes] Syncing xx of yy files... (eta: time).      |
+[remote file...] -> [local file...] bytes/bytes 76.22% (eta: time) | // remove after each sync
+
+vv
+O 23.73% [bytes/bytes] Syncing xx of yy files... (eta: time).
+
+v
+O
+
+-
+-
