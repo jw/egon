@@ -10,7 +10,7 @@ BRAILLE_EMPTY = "⠀"
 BRAILLE_FULL = "⣿"
 BRAILLE = [BRAILLE_EMPTY, "⣀", "⣤", "⣶", BRAILLE_FULL, "⣶", "⣤", "⣀"]
 
-DEFAULT_BYTE_COUNT = 5
+DEFAULT_BYTE_COUNT = 5000000
 
 # verbosity levels
 DEBUG = 4
@@ -112,6 +112,7 @@ def get_progress_percentage(processed_bytes, extra_bytes, size):
 
 
 def download(source_fs, destination_fs, required, verbose):
+    # print("Syncing {i} of {len(required)}")
     start_time = time_ns()
     for i, (path, size) in enumerate(required, start=1):
         if verbose in [DEBUG, VERBOSE]:
@@ -126,18 +127,27 @@ def download(source_fs, destination_fs, required, verbose):
             processed_bytes = 0
             file_start_time = time_ns()
             while some_bytes:
+                block_start_time = time_ns()
                 terminal_size = shutil.get_terminal_size()
                 local_file.write(some_bytes)
-                print(
-                    f"{BRAILLE[j % len(BRAILLE)]} {get_progress_percentage(processed_bytes, len(some_bytes), size)} [{get_progress_bytes(processed_bytes, len(some_bytes), size)}] Syncing {i} of {len(required)} files... {path}...",
-                    end="\r",
-                    flush=True,
-                )
                 j += 1
                 processed_bytes += len(some_bytes)
                 some_bytes = remote_file.read(DEFAULT_BYTE_COUNT)
+                block_end_time = time_ns()
+                by_second = 1000000000 / (block_end_time - block_start_time)
+                message = (
+                    f"{BRAILLE[j % len(BRAILLE)]} "
+                    f"{get_progress_percentage(processed_bytes, len(some_bytes), size)} "
+                    f"[{get_progress_bytes(processed_bytes, len(some_bytes), size)}] "
+                    f"{DEFAULT_BYTE_COUNT / 1000000 * by_second:.2f}MBps: "
+                    f"{Path(path).name}."
+                )
+                print(message, end="\r", flush=True)
             file_end_time = time_ns()
-            done = f"{BRAILLE_FULL} 100.00% [{size}/{size}] {path} (took {(file_end_time - file_start_time) / 1000000000:.2f}s)"
+            done = (
+                f"{BRAILLE_FULL} 100.00% [{size}/{size}] "
+                f"{path} (took {(file_end_time - file_start_time) / 1000000000:.2f}s)"
+            )
             print(f"{done}{' ' * (terminal_size.columns - len(done) - 1)}")
 
     else:
