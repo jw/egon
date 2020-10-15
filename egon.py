@@ -1,6 +1,6 @@
 import shutil
 from pathlib import Path
-from time import sleep
+from time import sleep, time_ns
 
 import typer as typer
 from fs import open_fs
@@ -112,6 +112,7 @@ def get_progress_percentage(processed_bytes, extra_bytes, size):
 
 
 def download(source_fs, destination_fs, required, verbose):
+    start_time = time_ns()
     for i, (path, size) in enumerate(required, start=1):
         if verbose in [DEBUG, VERBOSE]:
             print(f"{j:03}: {path}...")
@@ -123,6 +124,7 @@ def download(source_fs, destination_fs, required, verbose):
             some_bytes = remote_file.read(DEFAULT_BYTE_COUNT)
             j = 0
             processed_bytes = 0
+            file_start_time = time_ns()
             while some_bytes:
                 terminal_size = shutil.get_terminal_size()
                 local_file.write(some_bytes)
@@ -131,15 +133,16 @@ def download(source_fs, destination_fs, required, verbose):
                     end="\r",
                     flush=True,
                 )
-                sleep(0.05)
                 j += 1
                 processed_bytes += len(some_bytes)
                 some_bytes = remote_file.read(DEFAULT_BYTE_COUNT)
-            done = f"{BRAILLE_FULL} 100.00% [{size}/{size}]"
-            print(f"{done}{' ' * (terminal_size.columns - len(done) -1)}")
+            file_end_time = time_ns()
+            done = f"{BRAILLE_FULL} 100.00% [{size}/{size}] {path} (took {(file_end_time - file_start_time) / 1000000000:.2f}s)"
+            print(f"{done}{' ' * (terminal_size.columns - len(done) - 1)}")
 
     else:
-        print(f"Complete!")
+        end_time = time_ns()
+        print(f"Completed in {(end_time - start_time) / 1000000000:.2f} seconds.")
 
 
 if __name__ == "__main__":
