@@ -1,3 +1,4 @@
 /egon.egg-info/
-.idea/
+/.idea/
 /.pytest_cache
+/__pycache__
