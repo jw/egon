@@ -7,13 +7,11 @@ from typing import Optional
 import typer as typer
 from fs import open_fs
 
-from output import (
-    convert_bytes,
-    get_progress_bytes,
-    get_progress_percentage,
-    show_cursor,
-    hide_cursor,
-)
+from output import convert_bytes
+from output import get_progress_bytes
+from output import get_progress_percentage
+from output import hide_cursor
+from output import show_cursor
 
 DEFAULT_BYTE_COUNT = 5_000_000
 
@@ -29,7 +27,16 @@ def version_callback(value: bool):
 BRAILLE_EMPTY = "⠀"
 BRAILLE_FULL = "⣿"
 
-UP_DOWN_UP_BRAILLE = [BRAILLE_EMPTY, "⣀", "⣤", "⣶", BRAILLE_FULL, "⣶", "⣤", "⣀"]
+UP_DOWN_UP_BRAILLE = [
+    BRAILLE_EMPTY,
+    "⣀",
+    "⣤",
+    "⣶",
+    BRAILLE_FULL,
+    "⣶",
+    "⣤",
+    "⣀",
+]
 DOWN_BLOCK_BRAILLE = ["⠛", "⠶", "⣤"]
 UP_BLOCK_BRAILLE = ["⣤", "⠶", "⠛"]
 DOWN_BRAILLE = ["⠉", "⠒", "⠤", "⣀", " "]
@@ -69,9 +76,7 @@ def get_required_paths(destination_fs, source_fs, verbose):
     if not required:
         message = "No files needed to be retrieved."
     elif len(required) == 1:
-        message = (
-            f"One single file ({convert_bytes(required[0][1])}) needs to be retrieved."
-        )
+        message = f"One single file ({convert_bytes(required[0][1])}) needs to be retrieved."
     else:
         total_bytes = sum([t[1] for t in required])
         message = f"{len(required)} files ({convert_bytes(total_bytes)}) need to be retrieved."
@@ -105,9 +110,12 @@ remote_user = "jw"
 
 def egon(
     source: str = typer.Argument(
-        f"ssh://{remote_user}@{remote_host}{remote_base}", help="The remote source."
+        f"ssh://{remote_user}@{remote_host}{remote_base}",
+        help="The remote source.",
     ),
-    destination: str = typer.Argument(f"/home/jw/Downloads", help="The destination."),
+    destination: str = typer.Argument(
+        "/home/jw/Downloads", help="The destination."
+    ),
     verbose: int = typer.Option(
         0,
         "--verbose",
@@ -126,13 +134,17 @@ def egon(
     with open_fs(source) as source_fs, open_fs(destination) as destination_fs:
         required = get_required_paths(destination_fs, source_fs, verbose)
         if required:
-            download(source_fs, destination_fs, required, DOWN_BRAILLE, verbose)
+            download(
+                source_fs, destination_fs, required, DOWN_BRAILLE, verbose
+            )
 
 
 def eta(start_time, processed_bytes, extra_bytes, size):
     now = time_ns()
     processed_time = now - start_time
-    estimated_seconds_left = size / processed_bytes * processed_time / 1_000_000_000
+    estimated_seconds_left = (
+        size / processed_bytes * processed_time / 1_000_000_000
+    )
     estimated_end_date = datetime.fromtimestamp(
         start_time / 1_000_000_000 + estimated_seconds_left
     )
@@ -146,9 +158,9 @@ def download(source_fs, destination_fs, required, spinner, verbose):
     for i, (path, size) in enumerate(required, start=1):
         destination_fs.makedirs(str(Path(path).parents[0]), recreate=True)
         terminal_size = shutil.get_terminal_size()
-        with destination_fs.openbin(path, "w") as local_file, source_fs.openbin(
-            path
-        ) as remote_file:
+        with destination_fs.openbin(
+            path, "w"
+        ) as local_file, source_fs.openbin(path) as remote_file:
             some_bytes = remote_file.read(DEFAULT_BYTE_COUNT)
             j = 0
             processed_bytes = 0
@@ -198,7 +210,7 @@ if __name__ == "__main__":
     try:
         hide_cursor()
         typer.run(egon)
-    except Exception as e:
+    except Exception:
         print("Aborted.")
     finally:
         show_cursor()
