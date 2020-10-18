@@ -1,4 +1,5 @@
 import shutil
+import time
 from datetime import datetime
 from pathlib import Path
 from time import time_ns
@@ -7,11 +8,11 @@ from typing import Optional
 import typer as typer
 from fs import open_fs
 
+from cursor import hide_cursor
+from cursor import show_cursor
 from output import convert_bytes
 from output import get_progress_bytes
 from output import get_progress_percentage
-from output import hide_cursor
-from output import show_cursor
 
 DEFAULT_BYTE_COUNT = 5_000_000
 
@@ -50,7 +51,7 @@ ONE_LINE = 1
 SILENT = 0
 
 
-def get_path_size(fs, verbose):
+def get_path_size(fs, verbose=SILENT):
     if verbose == DEBUG:
         print(f"Getting paths and sizes from {fs}...")
     elif verbose == VERBOSE:
@@ -67,7 +68,7 @@ def get_path_size(fs, verbose):
     return d
 
 
-def get_required_paths(destination_fs, source_fs, verbose):
+def get_required_paths(destination_fs, source_fs, verbose=SILENT):
     if verbose in [DEBUG, VERBOSE, TWO_LINES]:
         print("Syncing...", end="\r")
     source_index = get_path_size(source_fs, verbose)
@@ -85,7 +86,7 @@ def get_required_paths(destination_fs, source_fs, verbose):
     return required
 
 
-def required_files(source, destination, verbose):
+def required_files(source, destination, verbose=SILENT):
     required = []
     for path, size in source.items():
         if path not in destination:
@@ -141,6 +142,7 @@ def egon(
 
 def eta(start_time, processed_bytes, extra_bytes, size):
     now = time_ns()
+    print(now)
     processed_time = now - start_time
     estimated_seconds_left = (
         size / processed_bytes * processed_time / 1_000_000_000
