@@ -1,12 +1,19 @@
 import shutil
 from datetime import datetime
 from pathlib import Path
-from time import sleep, time_ns
+from time import time_ns
 from typing import Optional
 
 import typer as typer
 from fs import open_fs
 
+from output import (
+    convert_bytes,
+    get_progress_bytes,
+    get_progress_percentage,
+    show_cursor,
+    hide_cursor,
+)
 
 DEFAULT_BYTE_COUNT = 5_000_000
 
@@ -122,29 +129,6 @@ def egon(
             download(source_fs, destination_fs, required, DOWN_BRAILLE, verbose)
 
 
-def convert_bytes(some_bytes: int) -> str:
-    if some_bytes == 0:
-        return "empty"
-    elif some_bytes < 2000:
-        return f"{some_bytes} bytes"
-    elif some_bytes < 2_000_000:
-        return f"{some_bytes / 1000:.2f} kilobytes"
-    elif some_bytes < 2_000_000_000:
-        return f"{some_bytes / 1000 / 1000:.2f} megabytes"
-    elif some_bytes < 2_000_000_000_000:
-        return f"{some_bytes / 1000 / 1000 / 1000:.2f} gigabytes"
-    else:
-        return f"{some_bytes / 1000 / 1000 / 1000 / 1000:.2f} terabytes"
-
-
-def get_progress_bytes(processed_bytes, extra_bytes, size):
-    return f"{convert_bytes(processed_bytes + extra_bytes)}/{convert_bytes(size)}"
-
-
-def get_progress_percentage(processed_bytes, extra_bytes, size):
-    return f"{(processed_bytes / size * 100):.2f}%"
-
-
 def eta(start_time, processed_bytes, extra_bytes, size):
     now = time_ns()
     processed_time = now - start_time
@@ -212,9 +196,9 @@ def download(source_fs, destination_fs, required, spinner, verbose):
 
 if __name__ == "__main__":
     try:
+        hide_cursor()
         typer.run(egon)
     except Exception as e:
-        print()
-        print()
         print("Aborted.")
-        # print(e)
+    finally:
+        show_cursor()
