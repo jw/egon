@@ -142,7 +142,6 @@ def egon(
 
 def eta(start_time, processed_bytes, extra_bytes, size):
     now = time_ns()
-    print(now)
     processed_time = now - start_time
     estimated_seconds_left = (
         size / processed_bytes * processed_time / 1_000_000_000
@@ -191,8 +190,9 @@ def download(source_fs, destination_fs, required, spinner, verbose):
             file_end_time = time_ns()
         if size != 0 and verbose != SILENT:
             done = (
-                f"{BRAILLE_FULL} 100.00% {convert_bytes(size)}: "
-                f"{path} (took {(file_end_time - file_start_time) / 1_000_000_000:.2f}s)"
+                f"{BRAILLE_FULL} 100.00% {convert_bytes(size, short=True)}: "
+                f"{Path(path).name} (took {(file_end_time - file_start_time) / 1_000_000_000:.2f}s "
+                f"and completed at {datetime.fromtimestamp(file_end_time / 1_000_000_000):%H:%M:%S})"
             )
             print(f"{done}{' ' * (terminal_size.columns - len(done) - 1)}")
         else:

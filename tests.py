@@ -66,6 +66,15 @@ def test_convert_bytes():
     assert convert_bytes(4444201100) == "4.44 gigabytes"
     assert convert_bytes(6666444201100) == "6.67 terabytes"
     assert convert_bytes(77776666444201100) == "77776.67 terabytes"
+    assert convert_bytes(0, short=True) == "empty"
+    assert convert_bytes(100, short=True) == "100b"
+    assert convert_bytes(1100, short=True) == "1100b"
+    assert convert_bytes(2100, short=True) == "2.10kB"
+    assert convert_bytes(20100, short=True) == "20.10kB"
+    assert convert_bytes(2201100, short=True) == "2.20MB"
+    assert convert_bytes(4444201100, short=True) == "4.44GB"
+    assert convert_bytes(6666444201100, short=True) == "6.67TB"
+    assert convert_bytes(77776666444201100, short=True) == "77776.67TB"
 
 
 def test_get_progress_bytes():
